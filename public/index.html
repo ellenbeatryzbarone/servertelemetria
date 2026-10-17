@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Telemetria CubeSat | Delta V Aerospace</title>
+<link rel="icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050A1C;--surface:#0C1533;--line:#1B2A5A;--text:#E8EEFF;--muted:#8FA0CC;
+  --blue:#3F6BFF;--cyan:#1FE0F2;--green:#2EF2A0;--purple:#8F5BFF;
+  --ok:#2EF2A0;--warn:#FFC13D;--bad:#FF4D6A;
+  --st:var(--muted);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Montserrat,system-ui,sans-serif;line-height:1.55;
+  background-image:radial-gradient(60rem 30rem at 85% -10%,rgba(143,91,255,.28),transparent 60%),
+                   radial-gradient(50rem 28rem at -10% 5%,rgba(63,107,255,.30),transparent 60%),
+                   radial-gradient(40rem 20rem at 50% 110%,rgba(31,224,242,.12),transparent 60%);
+  background-repeat:no-repeat}
+main{max-width:1040px;margin:0 auto;padding:0 1.25rem 4rem}
+a{color:var(--cyan)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:2rem;align-items:center;padding:4rem 0 3rem}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);line-height:1.05;font-weight:800;margin:0 0 1rem;letter-spacing:-.02em}
+.hero p{color:var(--muted);font-size:1.1rem;max-width:34ch;margin:0 0 1.5rem}
+.conn{display:inline-flex;align-items:center;gap:.6rem;padding:.45rem .9rem;border:1px solid var(--line);border-radius:999px;background:rgba(12,21,51,.7);font-size:.9rem}
+.dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--muted)}
+.conn.on .dot{background:var(--green);box-shadow:0 0 10px var(--green)}
+.conn.off .dot{background:var(--warn)}
+.logo-wrap{display:grid;place-items:center}
+.logo-wrap img{width:min(100%,360px);height:auto;filter:drop-shadow(0 0 40px rgba(31,224,242,.35)) drop-shadow(0 0 80px rgba(143,91,255,.35))}
+
+.live{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.live::before{content:"";display:block;height:5px;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--green),var(--purple))}
+.live-body{display:grid;grid-template-columns:auto 1fr;gap:2rem;padding:1.75rem;align-items:center}
+.temp{font-size:clamp(3.4rem,10vw,5.5rem);font-weight:800;line-height:1;letter-spacing:-.03em;color:var(--st);transition:color .3s}
+.temp small{font-size:.4em;font-weight:600;color:var(--muted);margin-left:.25rem}
+.pill{display:inline-block;margin-top:.8rem;padding:.35rem 1rem;border-radius:999px;font-weight:800;letter-spacing:.04em;color:#050A1C;background:var(--st);transition:background .3s}
+.age{display:block;margin-top:.6rem;color:var(--muted);font-size:.85rem}
+.live[data-s="ALERTA"]{box-shadow:0 0 0 1px var(--bad),0 0 40px rgba(255,77,106,.25)}
+.live[data-s="ALERTA"] .pill{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.live[data-s="ALERTA"] .pill{animation:none}html{scroll-behavior:auto}}
+#spark{width:100%;height:150px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:1.2rem;color:var(--muted);font-size:.85rem;margin-top:.6rem}
+.legend i{display:inline-block;width:.7rem;height:.7rem;border-radius:3px;margin-right:.4rem;vertical-align:-1px}
+
+h2{font-size:1.4rem;margin:3rem 0 1rem}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;min-width:480px}
+th,td{padding:.7rem 1rem;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr:last-child td{border-bottom:0}
+.tag{font-weight:800;font-size:.85rem}
+.NORMAL{color:var(--ok)}.CUIDADO{color:var(--warn)}.ALERTA{color:var(--bad)}
+.empty{padding:1.5rem;color:var(--muted)}
+
+.connect{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.25rem}
+.box h3{margin:0 0 .6rem;font-size:1rem}
+.url{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+code,pre{font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
+.url code{flex:1;min-width:0;overflow-wrap:anywhere;padding:.5rem .7rem;border-radius:8px;background:#071029;border:1px solid var(--line)}
+button{font:inherit;font-weight:600;color:#050A1C;background:linear-gradient(90deg,var(--cyan),var(--green));border:0;border-radius:8px;padding:.5rem 1rem;cursor:pointer}
+pre{margin:0;padding:.8rem;border-radius:8px;background:#071029;border:1px solid var(--line);overflow-x:auto;color:#cfe0ff}
+.box p{color:var(--muted);margin:.7rem 0 0;font-size:.9rem}
+
+footer{margin-top:3rem;color:var(--muted);font-size:.85rem;text-align:center}
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;padding-top:2rem;text-align:center}
+  .hero p{margin-inline:auto}
+  .logo-wrap{order:-1}.logo-wrap img{width:min(70%,240px)}
+  .live-body,.connect{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div>
+      <h1>Telemetria do CubeSat</h1>
+      <p>Temperatura recebida do cubo em tempo real, com aviso de cuidado e alerta.</p>
+      <span class="conn off" id="conn"><span class="dot"></span><span id="connTxt">Conectando ao servidor...</span></span>
+    </div>
+    <div class="logo-wrap"><img src="/logo.png" alt="Logo Delta V Aerospace Satélites"></div>
+  </section>
+
+  <section class="live" id="live" aria-live="polite">
+    <div class="live-body">
+      <div>
+        <div class="temp"><span id="temp">--</span><small>°C</small></div>
+        <span class="pill" id="pill">Sem leituras</span>
+        <span class="age" id="age">Aguardando o primeiro envio do cubo</span>
+      </div>
+      <div>
+        <svg id="spark" viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="Gráfico das últimas leituras"></svg>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2>Últimas leituras</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Hora</th><th>Dispositivo</th><th>Sensor</th><th>Temperatura</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty">Nenhuma leitura ainda. Envie um POST para o endereço abaixo.</div>
+  </div>
+
+  <h2>Conectar o cubo</h2>
+  <section class="connect">
+    <div class="box">
+      <h3>Endereço de envio</h3>
+      <div class="url"><code id="endpoint"></code><button id="copy" type="button">Copiar</button></div>
+      <p>Método POST, com o cabeçalho <code>x-api-key</code> e a chave combinada com a equipe.</p>
+    </div>
+    <div class="box">
+      <h3>Formato da mensagem</h3>
+      <pre>{
+  "device": "cubesat-01",
+  "sensor": "temp-01",
+  "temperature": 27.5
+}</pre>
+    </div>
+  </section>
+  <footer>Delta V Aerospace Satélites</footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const COLORS = {NORMAL:"#2EF2A0", CUIDADO:"#FFC13D", ALERTA:"#FF4D6A"};
+let cfg = {T_CUIDADO:40, T_ALERTA:60};
+let last = null;
+
+$("endpoint").textContent = location.origin + "/api/telemetry";
+$("copy").onclick = async () => {
+  try { await navigator.clipboard.writeText($("endpoint").textContent); $("copy").textContent = "Copiado"; }
+  catch { $("copy").textContent = "Copie manualmente"; }
+  setTimeout(() => $("copy").textContent = "Copiar", 1800);
+};
+
+function legend(){
+  $("legend").innerHTML = "";
+  [["#2EF2A0","Normal abaixo de "+cfg.T_CUIDADO+" °C"],["#FFC13D","Cuidado a partir de "+cfg.T_CUIDADO+" °C"],["#FF4D6A","Alerta a partir de "+cfg.T_ALERTA+" °C"]]
+  .forEach(([c,t]) => {
+    const s = document.createElement("span"), i = document.createElement("i");
+    i.style.background = c; s.append(i, t); $("legend").appendChild(s);
+  });
+}
+
+function spark(list){
+  const svg = $("spark"), NS = "http://www.w3.org/2000/svg";
+  svg.innerHTML = "";
+  const v = list.slice(0,30).reverse().map(r => r.temperature);
+  if (!v.length) return;
+  const lo = Math.min(...v, cfg.T_CUIDADO - 5), hi = Math.max(...v, cfg.T_ALERTA + 5);
+  const y = t => 140 - ((t - lo) / (hi - lo)) * 130, x = i => v.length === 1 ? 300 : 10 + i * (580 / (v.length - 1));
+  const mk = (n, a) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); svg.appendChild(e); return e; };
+  mk("defs", {}).innerHTML = '<linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#3F6BFF"/><stop offset=".5" stop-color="#1FE0F2"/><stop offset="1" stop-color="#8F5BFF"/></linearGradient>';
+  [[cfg.T_CUIDADO,"#FFC13D"],[cfg.T_ALERTA,"#FF4D6A"]].forEach(([t,c]) =>
+    mk("line", {x1:0,x2:600,y1:y(t),y2:y(t),stroke:c,"stroke-width":1,"stroke-dasharray":"5 5",opacity:.6}));
+  mk("polyline", {points:v.map((t,i) => x(i)+","+y(t)).join(" "),fill:"none",stroke:"url(#g)","stroke-width":3,"stroke-linejoin":"round","vector-effect":"non-scaling-stroke"});
+  mk("circle", {cx:x(v.length-1),cy:y(v[v.length-1]),r:5,fill:"#1FE0F2"});
+}
+
+function setConn(ok){
+  $("conn").className = "conn " + (ok ? "on" : "off");
+  $("connTxt").textContent = ok ? "Servidor conectado" : "Servidor acordando, tentando de novo...";
+}
+
+function age(){
+  if (!last) return;
+  const s = Math.max(0, Math.round((Date.now() - new Date(last.receivedAt)) / 1000));
+  $("age").textContent = s < 60 ? "Última leitura há " + s + " s" : "Última leitura há " + Math.round(s/60) + " min";
+}
+
+async function load(){
+  try{
+    const d = await (await fetch("/api/telemetry")).json();
+    setConn(true);
+    if (!d.length) return;
+    last = d[0];
+    $("temp").textContent = last.temperature.toFixed(1);
+    $("pill").textContent = last.status;
+    $("live").dataset.s = last.status;
+    document.documentElement.style.setProperty("--st", COLORS[last.status]);
+    $("empty").hidden = true;
+    const tb = $("rows"); tb.innerHTML = "";
+    d.slice(0,15).forEach(r => {
+      const tr = document.createElement("tr");
+      [new Date(r.receivedAt).toLocaleTimeString("pt-BR"), r.device, r.sensor, r.temperature + " °C", r.status].forEach((val,i) => {
+        const td = document.createElement("td"); td.textContent = val;
+        if (i === 4) td.className = "tag " + r.status;
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    spark(d); age();
+  } catch { setConn(false); }
+}
+
+fetch("/api/config").then(r => r.json()).then(c => { cfg = c; legend(); }).catch(legend);
+load(); setInterval(load, 2000); setInterval(age, 1000);
+</script>
+</body>
+</html>
